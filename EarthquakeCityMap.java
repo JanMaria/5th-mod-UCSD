@@ -35,7 +35,7 @@ public class EarthquakeCityMap extends PApplet {
 	private static final long serialVersionUID = 1L;
 
 	// IF YOU ARE WORKING OFFILINE, change the value of this variable to true
-	private static final boolean offline = true;
+	private static final boolean offline = false;
 	
 	/** This is where to find the local tiles, for working without an Internet connection */
 	public static String mbTilesString = "blankLight-1-3.mbtiles";
@@ -120,9 +120,9 @@ public class EarthquakeCityMap extends PApplet {
 		background(0);
 		map.draw();
 		addKey();
-		if(lastSelected!=null) {
+		/*if(lastSelected!=null) {
 			System.out.println(lastSelected.getLocation());
-		}
+		}*/
 		
 	}
 	
@@ -138,8 +138,10 @@ public class EarthquakeCityMap extends PApplet {
 			lastSelected = null;
 		
 		}
-		selectMarkerIfHover(quakeMarkers);
 		selectMarkerIfHover(cityMarkers);
+		if (lastSelected == null) {
+			selectMarkerIfHover(quakeMarkers);
+		}
 	}
 	
 	// If there is a marker under the cursor, and lastSelected is null 
@@ -165,11 +167,63 @@ public class EarthquakeCityMap extends PApplet {
 	@Override
 	public void mouseClicked()
 	{
+		if (lastClicked != null) {
+			lastClicked.setClicked(false);
+			lastClicked = null;
+			unhideMarkers();
+		} else { 
+
+			clickIfInside(cityMarkers);
+			if (lastClicked == null) {
+				clickIfInside(quakeMarkers);
+			}
+
+			if (lastClicked instanceof CityMarker) {
+				hideAllButThreatening();
+			} else if (lastClicked instanceof EarthquakeMarker) {
+				hideAllButThreatened();
+			}
+
+		}
+		
+		
 		// TODO: Implement this method
 		// Hint: You probably want a helper method or two to keep this code
 		// from getting too long/disorganized
 	}
 	
+	private void clickIfInside(List<Marker> list) {
+		for (Marker m : list) {
+			if (m.isInside(map, mouseX, mouseY)) {
+				lastClicked = (CommonMarker) m;
+				lastClicked.setClicked(true);
+				break;
+			}
+		}
+	}
+	
+	private void hideAllButThreatened() {
+		for (Marker m : quakeMarkers) {m.setHidden(true);}
+		lastClicked.setHidden(false);
+		EarthquakeMarker quake = (EarthquakeMarker) lastClicked;
+		for (Marker m : cityMarkers) {
+			if (lastClicked.getDistanceTo(m.getLocation()) > 20*(Math.pow(1.8, (2*quake.getMagnitude() - 5)))) {
+				m.setHidden(true);
+			}
+		}
+	}
+	
+	private void hideAllButThreatening() {
+		for (Marker m : cityMarkers) {
+			m.setHidden(true);
+		} lastClicked.setHidden(false);
+		for (Marker m : quakeMarkers) {
+			EarthquakeMarker quake = (EarthquakeMarker) m;
+			if (lastClicked.getDistanceTo(m.getLocation()) > 20*(Math.pow(1.8, (2*quake.getMagnitude() - 5)))) {
+				m.setHidden(true);
+			}
+		}
+	}
 	
 	// loop over and unhide all markers
 	private void unhideMarkers() {
