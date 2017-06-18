@@ -208,7 +208,7 @@ public class EarthquakeCityMap extends PApplet {
 		lastClicked.setHidden(false);
 		
 		EarthquakeMarker quake = (EarthquakeMarker) lastClicked;
-		//List<float[]> threatened = new ArrayList<float[]>();
+		List<float[]> threatened = new ArrayList<float[]>();
 		OceanQuakeMarker oceanMarker = (lastClicked instanceof OceanQuakeMarker) ? (OceanQuakeMarker) lastClicked : null;
 		
 		for (Marker m : cityMarkers) {
@@ -216,9 +216,10 @@ public class EarthquakeCityMap extends PApplet {
 				m.setHidden(true);
 			} else if (oceanMarker != null) {
 				CityMarker cm = (CityMarker) m;
-				oceanMarker.addThreatened(cm.getScreenPosition(map).array());
+				threatened.add(cm.getScreenPosition(map).array());
 			}
 		}
+		oceanMarker.addThreatened(threatened);
 	}
 	
 	private void hideAllButThreatening() {

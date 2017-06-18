@@ -1,5 +1,6 @@
 package module5;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.fhpotsdam.unfolding.data.PointFeature;
@@ -27,13 +28,22 @@ public class OceanQuakeMarker extends EarthquakeMarker {
 	public void drawEarthquake(PGraphics pg, float x, float y) {
 		pg.rect(x-radius, y-radius, 2*radius, 2*radius);
 		pg.fill(0);
-		if (!threatened.isEmpty()) {
-			threatened.forEach(t -> pg.line(x, y, t[0], t[1]));
+		if (threatened != null) {
+			if (this.getClicked()) {
+				threatened.forEach(t -> pg.line(x, y, t[0]-200, t[1]-50));
+				
+			} /*else {
+				pg.fill(0x00000000);
+			}*/
+			
 		}
 	}
 	
-	public void addThreatened(float[] city) {
-		threatened.add(city);
+	public void addThreatened(List<float[]> cities) {
+		if (threatened == null) {
+			threatened = new ArrayList<float[]> ();
+		} else {threatened.clear();}
+		threatened.addAll(cities);
 	}
 
 	
