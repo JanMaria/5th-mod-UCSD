@@ -1,5 +1,7 @@
 package module5;
 
+import java.util.List;
+
 import de.fhpotsdam.unfolding.data.PointFeature;
 import processing.core.PGraphics;
 
@@ -10,6 +12,7 @@ import processing.core.PGraphics;
  *
  */
 public class OceanQuakeMarker extends EarthquakeMarker {
+	private List<float[]> threatened;
 	
 	public OceanQuakeMarker(PointFeature quake) {
 		super(quake);
@@ -23,8 +26,15 @@ public class OceanQuakeMarker extends EarthquakeMarker {
 	@Override
 	public void drawEarthquake(PGraphics pg, float x, float y) {
 		pg.rect(x-radius, y-radius, 2*radius, 2*radius);
+		pg.fill(0);
+		if (!threatened.isEmpty()) {
+			threatened.forEach(t -> pg.line(x, y, t[0], t[1]));
+		}
 	}
 	
+	public void addThreatened(float[] city) {
+		threatened.add(city);
+	}
 
 	
 

@@ -203,12 +203,20 @@ public class EarthquakeCityMap extends PApplet {
 	}
 	
 	private void hideAllButThreatened() {
-		for (Marker m : quakeMarkers) {m.setHidden(true);}
+		for (Marker m : quakeMarkers) 
+			{m.setHidden(true);}
 		lastClicked.setHidden(false);
+		
 		EarthquakeMarker quake = (EarthquakeMarker) lastClicked;
+		//List<float[]> threatened = new ArrayList<float[]>();
+		OceanQuakeMarker oceanMarker = (lastClicked instanceof OceanQuakeMarker) ? (OceanQuakeMarker) lastClicked : null;
+		
 		for (Marker m : cityMarkers) {
 			if (lastClicked.getDistanceTo(m.getLocation()) > 20*(Math.pow(1.8, (2*quake.getMagnitude() - 5)))) {
 				m.setHidden(true);
+			} else if (oceanMarker != null) {
+				CityMarker cm = (CityMarker) m;
+				oceanMarker.addThreatened(cm.getScreenPosition(map).array());
 			}
 		}
 	}
