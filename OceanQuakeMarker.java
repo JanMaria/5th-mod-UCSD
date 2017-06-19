@@ -31,10 +31,8 @@ public class OceanQuakeMarker extends EarthquakeMarker {
 		if (threatened != null) {
 			if (this.getClicked()) {
 				threatened.forEach(t -> pg.line(x, y, t[0]-200, t[1]-50));
-				
-			} /*else {
-				pg.fill(0x00000000);
-			}*/
+			}	
+			
 			
 		}
 	}

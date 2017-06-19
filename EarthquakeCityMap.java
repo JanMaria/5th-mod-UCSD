@@ -35,7 +35,7 @@ public class EarthquakeCityMap extends PApplet {
 	private static final long serialVersionUID = 1L;
 
 	// IF YOU ARE WORKING OFFILINE, change the value of this variable to true
-	private static final boolean offline = false;
+	private static final boolean offline = true;
 	
 	/** This is where to find the local tiles, for working without an Internet connection */
 	public static String mbTilesString = "blankLight-1-3.mbtiles";
@@ -219,7 +219,9 @@ public class EarthquakeCityMap extends PApplet {
 				threatened.add(cm.getScreenPosition(map).array());
 			}
 		}
-		oceanMarker.addThreatened(threatened);
+		if (!threatened.isEmpty()) {
+			oceanMarker.addThreatened(threatened);
+		}
 	}
 	
 	private void hideAllButThreatening() {
@@ -273,7 +275,7 @@ public class EarthquakeCityMap extends PApplet {
 		
 		text("Land Quake", xbase+50, ybase+70);
 		text("Ocean Quake", xbase+50, ybase+90);
-		text("Size ~ Magnitude", xbase+25, ybase+110);
+		text("Size -> Magnitude", xbase+25, ybase+110);
 		
 		fill(255, 255, 255);
 		ellipse(xbase+35, 
