@@ -15,6 +15,11 @@ public class Snake {
 	private long died;
 	
 	private final int snakeFPS = 10;
+	private final float offsetX;
+	private final float offsetY;
+	private final float width;
+	private final float height;
+	
 	//snake directions (possible displacement vectors)
 	private final float[] left = {-1, 0};
 	private final float[] right = {1, 0};
@@ -31,11 +36,17 @@ public class Snake {
 	
 	public Snake (PApplet applet, UnfoldingMap uMap) {
 		pa = applet;
+		map = uMap;
 		body = new HashMap<Integer, float[]>();
-		sR = (pa.height < pa.width) ? pa.height/40 : pa.width/40;
+		offsetX = map.mapDisplay.offsetX;
+		offsetY = map.mapDisplay.offsetY;
+		width = map.mapDisplay.getWidth();
+		height = map.mapDisplay.getHeight();
+		sR = (height < width) ? pa.height/40 : pa.width/40;
 		sX  = pa.width/2-sR;
 		sY = pa.height/2-sR;
-		map = uMap;
+		
+		
 		/*float [] start = {sX, sY};
 		body.put(0, start);*/
 	}
@@ -78,13 +89,6 @@ public class Snake {
 			keyAction();
 		}
 		
-		/*if (pa.keyCode == PConstants.LEFT) {dir = left;}
-		else if (pa.keyCode == PConstants.RIGHT) {dir = right;}
-		else if (pa.keyCode == PConstants.DOWN) {dir = down;}
-		else if (pa.keyCode == PConstants.UP) {dir = up;}*/
-		
-		
-		
 		if (!killed) {
 			if (pa.frameCount%snakeFPS == 1 || pa.frameCount%snakeFPS == snakeFPS/2+1) { //snake only moves 2 times per sec.
 				//System.out.println(pa.frameCount + "\t" + pa.frameCount%Math.round(pa.frameRate) + "\t" + Math.round(pa.frameRate) + "\t" + pa.frameRate);
@@ -110,16 +114,18 @@ public class Snake {
 	}
 	
 	public void kill() {
-		map.setActive(true);
-		pa.frameRate(60);
+		map.setActive(true); 
+		pa.frameRate(60); //default framerate
 		died = System.nanoTime(); //to make snake disappear after 3 seconds
 		killed = true;
 		
 	}
 	
 	private boolean isKilled() {
-		if(body.get(0)[0] > pa.width-sR || body.get(0)[0] < 0+sR || body.get(0)[1] > pa.height-sR || 
-				body.get(0)[1] < 0+sR) {return true;}
+		if(body.get(0)[0] > offsetX+width-sR || body.get(0)[0] < offsetX+sR || body.get(0)[1] > offsetY+height-sR || 
+				body.get(0)[1] < offsetY+sR) {return true;}
+		/*if(body.get(0)[0] > pa.width-sR || body.get(0)[0] < 0+sR || body.get(0)[1] > pa.height-sR || 
+				body.get(0)[1] < 0+sR) {return true;}*/
 		for(int i = 1; i < body.size(); i++) {
 			if (body.get(i)[0] == body.get(0)[0] && body.get(i)[1] == body.get(0)[1]) {return true;}
 		}
@@ -128,8 +134,13 @@ public class Snake {
 		return false;
 	}
 	
-	public void resetSnake() {
-		map.setActive(false);
+	public void runSnake() {
+		System.out.println("zoom: " + map.getZoom() + "\tzoom lever: " + map.getZoomLevel());
+		map.setActive(false); //so hitting arrows wouldn't change map panning
+		map.zoomToLevel(UnfoldingMap.DEFAULT_ZOOM_LEVEL);
+		System.out.println("zoom: " + map.getZoom() + "\tzoom lever: " + map.getZoomLevel());
+		map.panTo(UnfoldingMap.PRIME_MERIDIAN_EQUATOR_LOCATION);
+		System.out.println("zoom: " + map.getZoom() + "\tzoom lever: " + map.getZoomLevel());
 		pa.frameRate(snakeFPS);
 		moves = 0;
 		body = new HashMap<Integer, float[]>();
@@ -150,7 +161,7 @@ public class Snake {
 			else if (pa.keyCode == PConstants.UP) {dir = up;}
 		}
 		else {
-			if (pa.key == 'r') {resetSnake();}
+			if (pa.key == 'r') {runSnake();}
 			if (killed == false && pa.key == 'q') {kill();}
 		}
 	}
