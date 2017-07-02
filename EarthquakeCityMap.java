@@ -62,6 +62,8 @@ public class EarthquakeCityMap extends PApplet {
 	private CommonMarker lastSelected;
 	private CommonMarker lastClicked;
 	
+	private Snake snake;
+	
 	public void setup() {		
 		// (1) Initializing canvas and map tiles
 		size(900, 700, OPENGL);
@@ -113,6 +115,8 @@ public class EarthquakeCityMap extends PApplet {
 	    map.addMarkers(quakeMarkers);
 	    map.addMarkers(cityMarkers);
 	    
+	    snake = new Snake(this, map);
+	    
 	}  // End setup
 	
 	
@@ -120,6 +124,7 @@ public class EarthquakeCityMap extends PApplet {
 		background(0);
 		map.draw();
 		addKey();
+		snake.draw();
 		/*if(lastSelected!=null) {
 			System.out.println(lastSelected.getLocation());
 		}*/
