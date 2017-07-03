@@ -1,5 +1,7 @@
 package module5;
 
+import java.util.HashMap;
+
 import de.fhpotsdam.unfolding.data.Feature;
 import de.fhpotsdam.unfolding.data.PointFeature;
 import de.fhpotsdam.unfolding.geo.Location;
@@ -26,7 +28,10 @@ public class CityMarker extends CommonMarker {
 	
 	
 	public CityMarker(Feature city) {
-		super(((PointFeature)city).getLocation(), city.getProperties());
+		super(((PointFeature)city).getLocation());
+		HashMap<String, Object> properties = city.getProperties();
+		properties.put("radius", TRI_SIZE*1.0f);
+		this.setProperties(properties);
 		// Cities have properties: "name" (city name), "country" (country name)
 		// and "population" (population, in millions)
 	}
