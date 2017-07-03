@@ -393,5 +393,10 @@ public class EarthquakeCityMap extends PApplet {
 		}
 		return false;
 	}
+	
+	public void keyPressed() {
+		snake.keyAction();
+		
+	}
 
 }

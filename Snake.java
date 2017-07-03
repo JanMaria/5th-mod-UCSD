@@ -1,8 +1,12 @@
 package module5;
 
 import java.util.HashMap;
+import java.util.List;
 
 import de.fhpotsdam.unfolding.UnfoldingMap;
+import de.fhpotsdam.unfolding.marker.Marker;
+import de.fhpotsdam.unfolding.marker.MarkerManager;
+import de.fhpotsdam.unfolding.utils.ScreenPosition;
 import processing.core.PApplet;
 import processing.core.PConstants;
 
@@ -10,11 +14,11 @@ public class Snake {
 	private HashMap<Integer, float[]> body;
 	private float sX;
 	private float sY; 
-	private float sR;
+	private float sD; //diameter of body segments 
 	private boolean killed = true;
-	private long died;
+	private long timeOfDeath;
 	
-	private final int snakeFPS = 10;
+	private final int snakeFPS = 10; //map frame rate when snake is on (much lower than default so as not to overload a CPU)
 	private final float offsetX;
 	private final float offsetY;
 	private final float width;
@@ -28,39 +32,35 @@ public class Snake {
 	//snake current direction
 	private float[] dir = right;
 	
-	private int moves;
+	private long moves;
 	
 	private PApplet pa;  
 	private UnfoldingMap map;
+	
+	private List<Marker> markers;
 	
 	
 	public Snake (PApplet applet, UnfoldingMap uMap) {
 		pa = applet;
 		map = uMap;
+		markers = uMap.getMarkerManager(0).getMarkers();
 		body = new HashMap<Integer, float[]>();
 		offsetX = map.mapDisplay.offsetX;
 		offsetY = map.mapDisplay.offsetY;
 		width = map.mapDisplay.getWidth();
 		height = map.mapDisplay.getHeight();
-		sR = (height < width) ? pa.height/40 : pa.width/40;
-		sX  = pa.width/2-sR;
-		sY = pa.height/2-sR;
+		sD = (height < width) ? pa.height/40 : pa.width/40;
+		sX  = pa.width/2-sD/2;
+		sY = pa.height/2-sD/2;
 		
-		
-		/*float [] start = {sX, sY};
-		body.put(0, start);*/
 	}
 	
-	public HashMap<Integer, float[]> getBody() {
-		return body;
-	}
-	
-	public void goDir(/*float [] xy*/) {
+	private void goDir() {
 		if (!killed) {
 			
 			
 			float [] oldO = body.get(0);
-			float [] newO = {oldO[0] + dir[0]*2*sR, oldO[1] + dir[1]*2*sR};
+			float [] newO = {oldO[0] + dir[0]*sD, oldO[1] + dir[1]*sD};
 
 			for (int i = body.size()-1; i > 0; i--) {
 				body.put(i, body.get(i-1));
@@ -70,7 +70,7 @@ public class Snake {
 		
 	}
 	
-	public void addOne() {
+	private void addOne() {
 		if (moves == 0) {
 			float [] start = {sX, sY};
 			body.put(0, start);
@@ -83,29 +83,29 @@ public class Snake {
 	public void draw() {
 		pa.pushStyle();
 		pa.fill(0xAAFF8888);
-		pa.ellipseMode(PConstants.RADIUS);
+		pa.ellipseMode(PConstants.CENTER);
 		
-		if(pa.keyPressed) {
+		/*if(pa.keyPressed) {
 			keyAction();
-		}
+		}*/
 		
 		if (!killed) {
 			if (pa.frameCount%snakeFPS == 1 || pa.frameCount%snakeFPS == snakeFPS/2+1) { //snake only moves 2 times per sec.
-				//System.out.println(pa.frameCount + "\t" + pa.frameCount%Math.round(pa.frameRate) + "\t" + Math.round(pa.frameRate) + "\t" + pa.frameRate);
 				if (moves < 5) {
 					if (moves == 0) {breed();}
 					addOne();
 				}
 				goDir();
+				eat();
 				moves++;
 				if (isKilled()) {kill();}
 			}
-			body.forEach((k, v) -> pa.ellipse(v[0], v[1], sR, sR));
+			body.forEach((k, v) -> pa.ellipse(v[0], v[1], sD, sD));	
 		} else {
-			if ((System.nanoTime() - died)/Math.pow(10, 9) < 3) {
-				body.forEach((k, v) -> pa.ellipse(v[0], v[1], sR, sR));
-				body.forEach((k, v) -> pa.line(v[0]+sR/2, v[1]+sR/2, v[0]-sR/2, v[1]-sR/2));
-				body.forEach((k, v) -> pa.line(v[0]-sR/2, v[1]+sR/2, v[0]+sR/2, v[1]-sR/2));
+			if ((System.nanoTime() - timeOfDeath)/Math.pow(10, 9) < 3) {
+				body.forEach((k, v) -> pa.ellipse(v[0], v[1], sD, sD));
+				body.forEach((k, v) -> pa.line(v[0]+sD/2, v[1]+sD/2, v[0]-sD/2, v[1]-sD/2));
+				body.forEach((k, v) -> pa.line(v[0]-sD/2, v[1]+sD/2, v[0]+sD/2, v[1]-sD/2));
 			} else {
 				body = new HashMap<Integer, float[]>();
 			}
@@ -113,17 +113,17 @@ public class Snake {
 		pa.popStyle();
 	}
 	
-	public void kill() {
+	private void kill() {
 		map.setActive(true); 
-		pa.frameRate(60); //default framerate
-		died = System.nanoTime(); //to make snake disappear after 3 seconds
+		pa.frameRate(60); //default frame rate
+		timeOfDeath = System.nanoTime(); //to make snake disappear after 3 seconds
 		killed = true;
 		
 	}
 	
 	private boolean isKilled() {
-		if(body.get(0)[0] > offsetX+width-sR || body.get(0)[0] < offsetX+sR || body.get(0)[1] > offsetY+height-sR || 
-				body.get(0)[1] < offsetY+sR) {return true;}
+		if(body.get(0)[0] > offsetX+width-sD || body.get(0)[0] < offsetX+sD || body.get(0)[1] > offsetY+height-sD || 
+				body.get(0)[1] < offsetY+sD) {return true;}
 		/*if(body.get(0)[0] > pa.width-sR || body.get(0)[0] < 0+sR || body.get(0)[1] > pa.height-sR || 
 				body.get(0)[1] < 0+sR) {return true;}*/
 		for(int i = 1; i < body.size(); i++) {
@@ -134,26 +134,37 @@ public class Snake {
 		return false;
 	}
 	
-	public void runSnake() {
-		System.out.println("zoom: " + map.getZoom() + "\tzoom lever: " + map.getZoomLevel());
+	private void eat() {
+		for (Marker m : markers) {
+			ScreenPosition mPos = ((CommonMarker)m).getScreenPosition(map);
+			if (m.getProperties().containsKey("radius")) {
+				//below I'm checking whether snakes head overlap any marker 
+				if (Math.sqrt(Math.pow(mPos.x - body.get(0)[0], 2) + Math.pow(mPos.y - body.get(0)[1], 2)) <= sD / 2
+						+ (Float) m.getProperty("radius")) {
+					m.setHidden(true);
+				} 
+			}
+		}
+		
+	}
+	
+	private void runSnake() {
 		map.setActive(false); //so hitting arrows wouldn't change map panning
 		map.zoomToLevel(UnfoldingMap.DEFAULT_ZOOM_LEVEL);
-		System.out.println("zoom: " + map.getZoom() + "\tzoom lever: " + map.getZoomLevel());
 		map.panTo(UnfoldingMap.PRIME_MERIDIAN_EQUATOR_LOCATION);
-		System.out.println("zoom: " + map.getZoom() + "\tzoom lever: " + map.getZoomLevel());
-		pa.frameRate(snakeFPS);
+		pa.frameRate(snakeFPS); 
 		moves = 0;
 		body = new HashMap<Integer, float[]>();
 		dir = right;
 		killed = false;
 	}
 	
-	public void breed() {
+	private void breed() {
 		float [] start = {sX, sY};
 		body.put(0, start);
 	}
 	
-	private void keyAction() {
+	public void keyAction() {
 		if (pa.key == PConstants.CODED) {
 			if (pa.keyCode == PConstants.LEFT) {dir = left;}
 			else if (pa.keyCode == PConstants.RIGHT) {dir = right;}
@@ -161,9 +172,30 @@ public class Snake {
 			else if (pa.keyCode == PConstants.UP) {dir = up;}
 		}
 		else {
-			if (pa.key == 'r') {runSnake();}
+			if (pa.key == 'r') {
+				runSnake();
+				//hideMarkers();
+			}
 			if (killed == false && pa.key == 'q') {kill();}
 		}
 	}
+	
+	/*private void hideMarkers() {
+		List<Marker> markers = mm.getMarkers();
+		for (Marker m : markers) {m.setHidden(true);}
+		for (int i = 0; i < width/sD; i++) {
+			for (int k = 0; k < height/sD; k++) {
+				double x = i*sD + offsetX;
+				double y = k*sD + offsetY; 
+				for (Marker m : markers) {
+					if (m instanceof CityMarker) {
+						//m = (AbstractMarker) m;
+						//if (((CityMarker) m).getScreenPosition(map).x > x &&) {}
+					}
+				}
+				
+			}
+		}
+	}*/
 
 }
