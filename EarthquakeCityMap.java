@@ -64,6 +64,8 @@ public class EarthquakeCityMap extends PApplet {
 	
 	private Snake snake;
 	
+	
+	
 	public void setup() {		
 		// (1) Initializing canvas and map tiles
 		size(900, 700, OPENGL);

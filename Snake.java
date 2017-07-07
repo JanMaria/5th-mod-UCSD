@@ -6,7 +6,6 @@ import java.util.Random;
 
 import de.fhpotsdam.unfolding.UnfoldingMap;
 import de.fhpotsdam.unfolding.marker.Marker;
-import de.fhpotsdam.unfolding.marker.MarkerManager;
 import de.fhpotsdam.unfolding.utils.ScreenPosition;
 import processing.core.PApplet;
 import processing.core.PConstants;
@@ -107,7 +106,7 @@ public class Snake {
 		
 		
 		if (!killed) {
-			if ((System.nanoTime()-unhideTiming) / 1000000000 >= 3) {
+			if ((System.nanoTime()-unhideTiming) / 1000000000 >= 2) {
 				unhideTiming = System.nanoTime(); 
 				markers.get(random.nextInt(markers.size())).setHidden(false);
 			}
@@ -115,7 +114,8 @@ public class Snake {
 				removalTiming = System.nanoTime();
 				removeOne();
 			}
-			if (pa.frameCount%snakeFPS == 1 || pa.frameCount%snakeFPS == snakeFPS/2+1) { //snake only moves 2 times per sec.
+			/*if (pa.frameCount%snakeFPS == 1 || pa.frameCount%snakeFPS == snakeFPS/2+1) {*/ //snake only moves 2 times per sec.
+			if (pa.frameCount%snakeFPS == 1 || pa.frameCount%snakeFPS == 3|| pa.frameCount%snakeFPS == 5|| pa.frameCount%snakeFPS == 7|| pa.frameCount%snakeFPS == 9) {
 				if (moves < 4) {
 					if (moves == 0) {breed();}
 					addOne();
